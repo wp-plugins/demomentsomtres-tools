@@ -34,6 +34,10 @@ TBD
 
 == Changelog ==
 
-= 0.1 =
+= 2.0 =
+* Mailchimp functions added
+* Catalan translation
+
+= 1.0 =
 * Functions adminHelper_esc_attr, adminHelper_input, adminHelper_get_option
 * Initial version translation ready
