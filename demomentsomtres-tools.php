@@ -1,17 +1,13 @@
 <?php
-
 /*
   Plugin Name: DeMomentSomTres Tools
   Plugin URI: http://demomentsomtres.com/english/wordpress-plugins/demomentsomtres-tools/
   Description: DeMomentSomTres Tools is a function library and utilities used by all DeMomentSomTres plugins
-  Version: 2.0
+  Version: 2.1
   Author: Marc Queralt
   Author URI: http://demomentsomtres.com
  */
 
-define('DMST_TOOLS_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('DMST_TOOLS_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('DMST_TOOLS_LANG_DIR', dirname(plugin_basename(__FILE__)) . '/languages');
 define('DMST_TOOLS_TEXT_DOMAIN', 'DeMomentSomTres-Tools');
 
 // Make sure we don't expose any info if called directly
@@ -23,23 +19,134 @@ $demomentsomtres_tools = new DeMomentSomTresTools;
 
 class DeMomentSomTresTools {
 
+    const MENU_SLUG = 'dmstTools';
+    const OPTIONS = 'dmstTools';
+    const PAGE = 'dmstTools';
+    const TEXT_DOMAIN = DMST_TOOLS_TEXT_DOMAIN;
+    const SECTION_GENERAL_FUNCTIONS = 'dmstToolsGeneral';
+    const OPTION_FILTER_PLUGINS_URL = 'plugins_urls';
     const MAILCHIMP_SUCCESS = 'success';
     const MAILCHIMP_ERROR = 'error';
+
+    private $pluginURL;
+    private $pluginPath;
+    private $langDir;
 
     /**
      * @since 1.0
      */
-    function DeMomentSomTresTools() {
+    function __construct() {
+        $this->pluginURL = plugin_dir_url(__FILE__);
+        $this->pluginPath = plugin_dir_path(__FILE__);
+        $this->langDir = dirname(plugin_basename(__FILE__)) . '/languages';
+
         add_action('plugins_loaded', array(&$this, 'plugin_init'));
+        add_action('admin_menu', array(&$this, 'admin_menu'));
+        add_action('admin_init', array(&$this, 'admin_init'));
+        
+        $this->activate_plugins_url_filter();
     }
 
     /**
      * @since 1.0
      */
     function plugin_init() {
-        load_plugin_textdomain(DMST_TOOLS_TEXT_DOMAIN, false, DMST_TOOLS_LANG_DIR);
+        load_plugin_textdomain(DMST_TOOLS_TEXT_DOMAIN, false, $this->langDir);
     }
 
+    /**
+     * @since 2.1
+     */
+    function admin_menu() {
+        add_options_page(__('DeMomentSomTres Tools', self::TEXT_DOMAIN), __('DeMomentSomTres Tools', self::TEXT_DOMAIN), 'manage_options', self::MENU_SLUG, array(&$this, 'admin_page'));
+    }
+
+    /**
+     * @since 2.1
+     */
+    function admin_page() {
+        ?>
+        <div class="wrap">
+            <h2><?php _e('DeMomentSomTres Tools', self::TEXT_DOMAIN); ?></h2>
+            <form action="options.php" method="post">
+                <?php settings_fields(self::OPTIONS); ?>
+                <?php do_settings_sections(self::PAGE); ?>
+                <br/>
+                <input name="Submit" class="button button-primary" type="submit" value="<?php _e('Save Changes', self::TEXT_DOMAIN); ?>"/>
+            </form>
+        </div>
+        <div style="background-color:#eee;/*display:none;*/">
+            <h2><?php _e('Options', self::TEXT_DOMAIN); ?></h2>
+            <pre style="font-size:0.8em;"><?php print_r(get_option(self::OPTIONS)); ?></pre>
+        </div>
+        <?php
+    }
+
+    /**
+     * @since 2.1
+     */
+    function admin_init() {
+        register_setting(self::OPTIONS, self::OPTIONS, array(&$this, 'admin_validate_options'));
+
+        add_settings_section(self::SECTION_GENERAL_FUNCTIONS, __('General functions and filters', self::TEXT_DOMAIN), array(&$this, 'admin_section_general'), self::PAGE);
+
+        add_settings_field(self::OPTION_FILTER_PLUGINS_URL, __('Activate plugins_url filter', self::TEXT_DOMAIN), array(&$this, 'admin_field_plugins_url_filter'), self::PAGE, self::SECTION_GENERAL_FUNCTIONS);
+    }
+
+    /**
+     * @since 2.1
+     */
+    function admin_validate_options($input = array()) {
+        $input = DeMomentSomTresTools::adminHelper_esc_attr($input);
+        return $input;
+    }
+
+    /**
+     * @since 2.1
+     */
+    function admin_section_general() {
+        echo '<p>' . __('Functions and filters activation in this WordPress instance', self::TEXT_DOMAIN) . '</p>';
+    }
+
+    /**
+     * @since 2.1
+     */
+    function admin_field_plugins_url_filter() {
+        $name = self::OPTION_FILTER_PLUGINS_URL;
+        $value = DeMomentSomTresTools::get_option(self::OPTIONS, $name);
+        DeMomentSomTresTools::adminHelper_inputArray(self::OPTIONS, $name, $value, array(
+            'type' => 'checkbox'
+        ));
+        echo "<p style='font-size:0.8em;'>"
+        . __('If this filter is active, plugins_url function is filtered in order to prevent subdirectory names in js and css files.', self::TEXT_DOMAIN)
+        . "</p>";
+    }
+
+    /** INTERNAL FUNCTIONALITY **/
+    
+    function activate_plugins_url_filter() {
+        $name = self::OPTION_FILTER_PLUGINS_URL;
+        $value = DeMomentSomTresTools::get_option(self::OPTIONS, $name,False);
+        if($value):
+            add_filter('plugins_url',array(&$this,'plugins_url_filter'),90,3);
+        endif;
+    }
+    
+    function plugins_url_filter($url,$path,$plugin) {
+        $siteURL=site_url().'/';
+        $isSSL=is_ssl();
+        if($isSSL):
+            $scheme='https';
+        else:
+            $scheme='http';
+        endif;
+        $networkHome=network_home_url('',$scheme);
+        $newURL = str_replace($siteURL, $networkHome, $url);
+//        echo '<pre>url:'.$url.'<br/>path:'.$path.'<br/>plugin:'.$plugin.'<br/>site_url:'.$siteURL .'<br/>networkHome:'.$networkHome.'<br/>isSSL:'.$isSSL.'<br/>'.$newURL.'</pre>';
+//        exit; 
+        return $newURL;
+    }
+    
     /** ADMIN HELPER FUNCTIONS * */
 
     /**
@@ -387,7 +494,7 @@ class DeMomentSomTresTools {
                 $result['subscribedToList'] = FALSE;
                 $result['errors'] = $subscription['errors'];
             else:
-                $result['subscribedToList'] = ($subscription['data'][0]['status']!='unsubscribed');
+                $result['subscribedToList'] = ($subscription['data'][0]['status'] != 'unsubscribed');
                 $result['groupings'] = $subscription['data'][0]['merges']['GROUPINGS'];
             endif;
         endif;
@@ -422,13 +529,13 @@ class DeMomentSomTresTools {
             if (isset($subscribe['status'])):
                 $result = array(
                     'status' => DeMomentSomTresTools::MAILCHIMP_ERROR,
-                    'message' => sprintf(__('An error while subscribing %s happened', DMST_TOOLS_TEXT_DOMAIN), $email),
+                    'message' => sprintf(__('An error while subscribing %s happened', self::TEXT_DOMAIN), $email),
                     'error' => $subscribe,
                 );
             else:
                 $result = array(
                     'status' => DeMomentSomTresTools::MAILCHIMP_SUCCESS,
-                    'message' => sprintf(__('%s successfully subscribed to the list', DMST_TOOLS_TEXT_DOMAIN), $email),
+                    'message' => sprintf(__('%s successfully subscribed to the list', self::TEXT_DOMAIN), $email),
                 );
             endif;
         endif;

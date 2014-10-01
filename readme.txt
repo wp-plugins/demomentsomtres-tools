@@ -34,6 +34,10 @@ TBD
 
 == Changelog ==
 
+= 2.1 =
+* Administration options
+* Optional plugins_url filter
+
 = 2.0 =
 * Mailchimp functions added
 * Catalan translation
