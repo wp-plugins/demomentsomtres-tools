@@ -34,6 +34,9 @@ TBD
 
 == Changelog ==
 
+= 2.2 =
+* Administration options disabled
+
 = 2.1 =
 * Administration options
 * Optional plugins_url filter
