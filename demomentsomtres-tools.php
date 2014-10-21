@@ -3,7 +3,7 @@
   Plugin Name: DeMomentSomTres Tools
   Plugin URI: http://demomentsomtres.com/english/wordpress-plugins/demomentsomtres-tools/
   Description: DeMomentSomTres Tools is a function library and utilities used by all DeMomentSomTres plugins
-  Version: 2.2
+  Version: 2.3
   Author: Marc Queralt
   Author URI: http://demomentsomtres.com
  */
