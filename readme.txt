@@ -3,7 +3,7 @@ Contributors: marcqueralt
 Tags: functions, library, framework
 Donate link: http://DeMomentSomTres.com
 Requires at least: 3.8
-Tested up to: 3.9.1
+Tested up to: 4.2.2
 Stable tag: head
 
 == Description ==
@@ -33,6 +33,8 @@ TBD
 TBD
 
 == Changelog ==
+= 2.3.1 =
+* size attribute added to adminHelper_input_array
 
 = 2.2 =
 * Administration options disabled

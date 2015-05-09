@@ -3,7 +3,7 @@
   Plugin Name: DeMomentSomTres Tools
   Plugin URI: http://demomentsomtres.com/english/wordpress-plugins/demomentsomtres-tools/
   Description: DeMomentSomTres Tools is a function library and utilities used by all DeMomentSomTres plugins
-  Version: 2.3
+  Version: 2.3.1
   Author: Marc Queralt
   Author URI: http://demomentsomtres.com
  */
@@ -123,31 +123,30 @@ class DeMomentSomTresTools {
         . "</p>";
     }
 
-    /** INTERNAL FUNCTIONALITY **/
-    
+    /** INTERNAL FUNCTIONALITY * */
     function activate_plugins_url_filter() {
         $name = self::OPTION_FILTER_PLUGINS_URL;
-        $value = DeMomentSomTresTools::get_option(self::OPTIONS, $name,False);
-        if($value):
-            add_filter('plugins_url',array(&$this,'plugins_url_filter'),90,3);
+        $value = DeMomentSomTresTools::get_option(self::OPTIONS, $name, False);
+        if ($value):
+            add_filter('plugins_url', array(&$this, 'plugins_url_filter'), 90, 3);
         endif;
     }
-    
-    function plugins_url_filter($url,$path,$plugin) {
-        $siteURL=site_url().'/';
-        $isSSL=is_ssl();
-        if($isSSL):
-            $scheme='https';
+
+    function plugins_url_filter($url, $path, $plugin) {
+        $siteURL = site_url() . '/';
+        $isSSL = is_ssl();
+        if ($isSSL):
+            $scheme = 'https';
         else:
-            $scheme='http';
+            $scheme = 'http';
         endif;
-        $networkHome=network_home_url('',$scheme);
+        $networkHome = network_home_url('', $scheme);
         $newURL = str_replace($siteURL, $networkHome, $url);
 //        echo '<pre>url:'.$url.'<br/>path:'.$path.'<br/>plugin:'.$plugin.'<br/>site_url:'.$siteURL .'<br/>networkHome:'.$networkHome.'<br/>isSSL:'.$isSSL.'<br/>'.$newURL.'</pre>';
 //        exit; 
         return $newURL;
     }
-    
+
     /** ADMIN HELPER FUNCTIONS * */
 
     /**
@@ -243,6 +242,7 @@ class DeMomentSomTresTools {
      *              'list
      *              'cols': textarea cols number
      *              'rows': textarea rows number
+     *              'size': input text length
      *              'wpautop': (boolean) wp_editor wpautop parameter
      *              'class': css classes of the input field 
      *              'echo': (boolean) if set to false returns the value of the field instead of echoing it. Default: true.
@@ -267,6 +267,7 @@ class DeMomentSomTresTools {
             'listNone' => '-------',
             'cols' => 100,
             'rows' => 25,
+            'size' => '',
             'wpautop' => true,
             'class' => '',
             'echo' => true
@@ -276,6 +277,8 @@ class DeMomentSomTresTools {
             $classes = " class='$class' ";
         else
             $classes = "";
+        if ('' != $size)
+            $size = " size='$size' ";
         $result = $html_before;
         switch ($type):
             case 'page-dropdown':
@@ -307,7 +310,7 @@ class DeMomentSomTresTools {
                 wp_editor($value, $id, array('wpautop' => $wpautop, 'textarea_name' => $name));
                 break;
             default:
-                $result.= "<input id='$id' name='$name' type='text' value='$value'$classes/>";
+                $result.= "<input id='$id' name='$name' type='text' value='$value'$classes $size/>";
         endswitch;
         $result.= $html_after;
         if (!$echo):
