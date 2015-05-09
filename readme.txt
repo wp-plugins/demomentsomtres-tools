@@ -4,7 +4,7 @@ Tags: functions, library, framework
 Donate link: http://DeMomentSomTres.com
 Requires at least: 3.8
 Tested up to: 4.2.2
-Stable tag: head
+Stable tag: trunk
 
 == Description ==
 
