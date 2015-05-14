@@ -3,7 +3,7 @@
   Plugin Name: DeMomentSomTres Tools
   Plugin URI: http://demomentsomtres.com/english/wordpress-plugins/demomentsomtres-tools/
   Description: DeMomentSomTres Tools is a function library and utilities used by all DeMomentSomTres plugins
-  Version: 2.3.1
+  Version: 2.4
   Author: Marc Queralt
   Author URI: http://demomentsomtres.com
  */
@@ -233,7 +233,7 @@ class DeMomentSomTresTools {
      * @param string $field the option name
      * @param string $value the option value 
      * @param array $params with the following elements
-     *              'type': specifies the type of input. If not set, it will be treated as a text box. Allowed values: 'page-dropdown' to show a drop down of pages, 'radio' to show a radio button, 'checkbox' to show a checkbox, 'list' as select, 'textarea', 'editor'
+     *              'type': specifies the type of input. If not set, it will be treated as a text box. Allowed values: 'page-dropdown' to show a drop down of pages, 'radio' to show a radio button, 'checkbox' to show a checkbox, 'list' as select, 'textarea', 'editor', 'date
      *              'checked'
      *              'html_before': html to print before the field
      *              'html_after': html to print after the field
@@ -308,6 +308,9 @@ class DeMomentSomTresTools {
                 break;
             case 'editor':
                 wp_editor($value, $id, array('wpautop' => $wpautop, 'textarea_name' => $name));
+                break;
+            case 'date':
+                $result.= "<input id='$id' name='$name' type='date' value='$value'$classes $size/>";
                 break;
             default:
                 $result.= "<input id='$id' name='$name' type='text' value='$value'$classes $size/>";
